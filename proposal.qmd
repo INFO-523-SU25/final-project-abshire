@@ -1,8 +1,8 @@
 ---
-title: "Proposal title"
+title: "Sweet Spotting: Predicting xwOBA and xOPS from Swing Science"
 subtitle: "Proposal"
 author: 
-  - name: "Team Name - Team member 1, Team member 2,..."
+  - name: "Trevor Abshire"
     affiliations:
       - name: "College of Information Science, University of Arizona"
 description: "Project description"
@@ -31,6 +31,9 @@ import numpy as np
 #| label: load-dataset
 #| message: false
 ```
+
+High-Level Goal
+Predict key expected hitting metrics (xwOBA, xOPS, and xISO) using swing and contact profile data from MLB Statcast leaderboards.
 
 A brief description of your dataset including its provenance, dimensions, etc. as well as the reason why you chose this dataset.
 
