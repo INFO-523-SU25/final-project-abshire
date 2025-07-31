@@ -1,2 +1,6 @@
 jupyter
 nbformat
+numpy
+pandas
+seaborn
+matplotlib.pyplot
