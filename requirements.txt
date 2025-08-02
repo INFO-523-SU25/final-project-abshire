@@ -3,5 +3,5 @@ nbformat
 numpy
 pandas
 seaborn
-matplotlib.pyplot
+matplotlib
 sklearn
