@@ -36,7 +36,7 @@ import matplotlib.pyplot as plt
 #| message: false
 #| echo: false
 data = pd.read_csv("data/statcast2015_2025.csv")
-data.shape
+data.head(10)
 ```
 
 ```{python}
