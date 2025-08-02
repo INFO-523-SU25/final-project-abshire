@@ -1,7 +1,8 @@
 {
-  "hash": "0e6b82ab6a634a8b8dc925668c0f975c",
+  "hash": "544276fd22650728106b6ee7a719745c",
   "result": {
-    "markdown": "---\ntitle: Project title\nsubtitle: INFO 523 - Project Final\nauthor: Team name\nformat: html\neditor: visual\n---\n\n## Abstract\n\nAdd project abstract here.\n\n",
+    "engine": "jupyter",
+    "markdown": "---\ntitle: 'Sweet Spotting: Predicting Baseball Hitting Success from Swing Science'\nsubtitle: INFO 523 - Final Project\nauthor:\n  - name: Trevor Abshire\n    affiliations:\n      - name: 'College of Information Science, University of Arizona'\ndescription: Project description\nformat:\n  html:\n    code-tools: true\n    code-overflow: wrap\n    embed-resources: true\neditor: visual\nexecute:\n  warning: false\n  echo: false\n---\n\n## Abstract\n\nAdd project abstract here.\n\n",
     "supporting": [
       "index_files"
     ],

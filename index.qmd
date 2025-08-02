@@ -1,8 +1,8 @@
 ---
-title: "Project Title"
+title: "Sweet Spotting: Predicting Baseball Hitting Success from Swing Science"
 subtitle: "INFO 523 - Final Project"
 author: 
-  - name: "Team name - Team member 1, Team member 2,..."
+  - name: "Trevor Abshire"
     affiliations:
       - name: "College of Information Science, University of Arizona"
 description: "Project description"

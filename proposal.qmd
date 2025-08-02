@@ -1,11 +1,11 @@
 ---
-title: "Proposal title"
+title: "Sweet Spotting: Predicting Baseball Hitting Success from Swing Science"
 subtitle: "Proposal"
 author: 
-  - name: "Team Name - Team member 1, Team member 2,..."
+  - name: "Trevor Abshire"
     affiliations:
       - name: "College of Information Science, University of Arizona"
-description: "Project description"
+description: "Predict advanced hitting performance metrics (xwOBA, xSLG, and xISO) from swing and contact profile data using machine learning techniques."
 format:
   html:
     code-tools: true
@@ -23,6 +23,9 @@ jupyter: python3
 #| label: load-pkgs
 #| message: false
 import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 ```
 
 ## Dataset
@@ -30,16 +33,82 @@ import numpy as np
 ```{python}
 #| label: load-dataset
 #| message: false
+data = pd.read_csv("data/statcast2015_2025.csv")
+data.shape
 ```
 
-A brief description of your dataset including its provenance, dimensions, etc. as well as the reason why you chose this dataset.
+```{python}
+#| label: hist-targets
+#| fig-cap: "Distributions of xwOBA, xSLG, and xISO"
+#| fig-align: center
 
-Make sure to load the data and use inline code for some of this information.
+fig, axs = plt.subplots(1, 3, figsize=(15, 4))
+
+targets = ['xwoba', 'xslg', 'xiso']
+
+for i, col in enumerate(targets):
+    sns.histplot(data[col], bins=20, kde=True, ax=axs[i], color='steelblue')
+    axs[i].set_title(col)
+    axs[i].set_xlabel("")
+    axs[i].set_ylabel("")
+
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+#| label: scatter-predictors
+#| fig-cap: "Relationships between select predictors and xwOBA"
+#| fig-align: center
+
+fig, axs = plt.subplots(2, 2, figsize=(12, 8))
+
+predictors = ['launch_angle_avg', 'hard_hit_percent', 'whiff_percent', 'avg_swing_speed']
+
+for i, col in enumerate(predictors):
+    row = i // 2
+    col_idx = i % 2
+    sns.scatterplot(x=data[col], y=data['xwoba'], ax=axs[row][col_idx], color='darkorange')
+    axs[row][col_idx].set_title(f'{col} vs xwoba')
+
+plt.tight_layout()
+plt.show()
+```
+
+## High-Level Goal
+
+Predict key expected hitting metrics (xwOBA, xSLG, and xISO) using swing and contact profile data from MLB Statcast leaderboards.
+
+## Dataset Description
+
+This project uses a dataset containing Major League Baseball Statcast data spanning the 2015 to 2025 seasons. The data was obtained from Baseball Savant and includes 1531 rows. Each row represents a qualified hitter and their respective metrics for the season that they played and includes a wide range of advanced metrics related to contact quality, swing behavior, and expected outcomes, including xwOBA, xSLG, xISO, exit velocity (EV), launch angle (LA), and hard-hit rates.
+
+I chose this dataset because it offers a foundation for exploring the relationships between underlying batted-ball characteristics and expected offensive performance. It supports the goal of understanding how specific swing and contact metrics contribute to better outcomes at the plate. The large size and variety of swing metrics within the dataset also allow for more exploratory and explanatory analysis.
 
 ## Questions
 
-The two questions you want to answer.
+Can we predict a player’s expected offensive output (e.g., xwOBA or xSLG) using swing decisions and batted-ball quality metrics?
+
+Can we classify hitters into performance tiers (e.g., elite, average, below average) based on swing and contact profiles?
 
 ## Analysis plan
 
--   A plan for answering each of the questions including the variables involved, variables to be created (if any), external data to be merged in (if any).
+To address the first question, predicting a player’s expected offensive output, I plan to model xwOBA or xSLG using swing decision and contact quality metrics such as average launch angle, barrel rate, hard-hit percentage, whiff rate, swing rate, and various contact classifications. These variables reflect a hitter’s approach and ability to make quality contact, which are key drivers of expected performance. I’ll explore regression models like linear regression and random forests, using performance metrics such as RMSE and R² to evaluate accuracy. For the second question, classifying hitters into performance tiers, I plan to create a new categorical variable based on xwOBA percentiles (e.g., top 25%, middle 50%, bottom 25%) and use classification models such as logistic regression or decision trees to predict tier membership. Both questions may benefit from feature engineering (e.g., composite contact scores).
+
+## Plan of Attack
+
+Week 1 (Aug 5–11):
+
+Clean and explore the data, create key visualizations, and finalize research questions.
+
+Week 2 (Aug 12–18):
+
+Build and evaluate predictive models for hitting metrics, tune parameters.
+
+Week 3 (Aug 19–20):
+
+Polish code, finalize report and visualizations, organize repo, and submit project.
+
+## Repository Organization
+
+The project repository is organized into clearly labeled folders for data, scripts, and outputs. The data/ folder stores raw and cleaned datasets, scripts/ contains all Python and Quarto code used for analysis, and outputs/ holds visualizations and final results. Each folder includes a README.md file to briefly explain its contents and purpose.
