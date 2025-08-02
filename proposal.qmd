@@ -22,6 +22,7 @@ jupyter: python3
 ```{python}
 #| label: load-pkgs
 #| message: false
+#| echo: false
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -33,6 +34,7 @@ import matplotlib.pyplot as plt
 ```{python}
 #| label: load-dataset
 #| message: false
+#| echo: false
 data = pd.read_csv("data/statcast2015_2025.csv")
 data.shape
 ```
@@ -41,6 +43,7 @@ data.shape
 #| label: hist-targets
 #| fig-cap: "Distributions of xwOBA, xSLG, and xISO"
 #| fig-align: center
+#| echo: false
 
 fig, axs = plt.subplots(1, 3, figsize=(15, 4))
 
@@ -60,6 +63,7 @@ plt.show()
 #| label: scatter-predictors
 #| fig-cap: "Relationships between select predictors and xwOBA"
 #| fig-align: center
+#| echo: false
 
 fig, axs = plt.subplots(2, 2, figsize=(12, 8))
 
