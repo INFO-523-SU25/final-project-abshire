@@ -3,6 +3,6 @@ nbformat
 numpy
 pandas
 seaborn
-matplotlib.pyplot
+matplotlib
 pybaseball
 calendar
