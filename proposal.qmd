@@ -1,11 +1,11 @@
 ---
-title: "Sweet Spotting: Predicting Baseball Hitting Success from Swing Science"
+title: "Sweet Spotting: Predicting Pitcher Effectiveness from Pitch Location Zones"
 subtitle: "Proposal"
 author: 
   - name: "Trevor Abshire"
     affiliations:
       - name: "College of Information Science, University of Arizona"
-description: "Predict advanced hitting performance metrics (xwOBA, xSLG, and xISO) from swing and contact profile data using machine learning techniques."
+description: "Model and visualize how pitch location and swing behavior influence the likelihood of quality contact, incorporating zone-based tendencies at both the pitcher and hitter level."
 format:
   html:
     code-tools: true
@@ -27,6 +27,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from pybaseball import statcast
+from calendar import monthrange
 ```
 
 ## Dataset
@@ -35,83 +37,177 @@ import matplotlib.pyplot as plt
 #| label: load-dataset
 #| message: false
 #| echo: false
-data = pd.read_csv("data/statcast2015_2025.csv")
+import pandas as pd
+data = pd.read_csv("data/pitch_2024_relevant.csv")
 data.head(10)
 ```
 
 ```{python}
 #| label: hist-targets
-#| fig-cap: "Distributions of xwOBA, xSLG, and xISO"
+#| fig-cap: "Pitches in Each Zone"
 #| fig-align: center
 #| echo: false
 
-fig, axs = plt.subplots(1, 3, figsize=(15, 4))
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
 
-targets = ['xwoba', 'xslg', 'xiso']
+data = pd.read_csv("data/pitch_2024_relevant.csv")
 
-for i, col in enumerate(targets):
-    sns.histplot(data[col], bins=20, kde=True, ax=axs[i], color='steelblue')
-    axs[i].set_title(col)
-    axs[i].set_xlabel("")
-    axs[i].set_ylabel("")
+# Count pitches in each zone
+zone_counts = data['zone'].value_counts().sort_index()
 
-plt.tight_layout()
+# Initialize a 5x3 grid (rows: top to bottom, cols: left to right)
+zone_matrix = np.zeros((5, 3))
+
+# Fill the matrix
+# Top row: zones 11 (left), 12 (right)
+zone_matrix[0, 0] = zone_counts.get(11, 0)
+zone_matrix[0, 2] = zone_counts.get(12, 0)
+
+# Zones 1–9: standard 3x3 grid
+zone_matrix[1:4, :] = np.reshape(zone_counts.reindex(range(1, 10), fill_value=0).values, (3, 3))
+
+# Bottom row: zones 13 (left), 14 (right)
+zone_matrix[4, 0] = zone_counts.get(13, 0)
+zone_matrix[4, 2] = zone_counts.get(14, 0)
+
+# Plot heatmap
+plt.figure(figsize=(6, 6))
+sns.heatmap(zone_matrix, annot=True, fmt='.0f', cmap='Reds', cbar=True, linewidths=0.5,
+            xticklabels=['Left', 'Middle', 'Right'],
+            yticklabels=['Above', 'Top', 'Middle', 'Bottom', 'Below'])
+plt.title('Pitch Count by Zone')
+plt.xlabel('Horizontal Location')
+plt.ylabel('Vertical Location')
 plt.show()
 ```
 
 ```{python}
-#| label: scatter-predictors
-#| fig-cap: "Relationships between select predictors and xwOBA"
+#| fig-cap: "x and z's"
 #| fig-align: center
 #| echo: false
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
 
-fig, axs = plt.subplots(2, 2, figsize=(12, 8))
+data = pd.read_csv("data/pitch_2024_relevant.csv")
+# Filter out any missing values
+pitch_locations = data[['plate_x', 'plate_z']]
 
-predictors = ['launch_angle_avg', 'hard_hit_percent', 'whiff_percent', 'avg_swing_speed']
+# Create scatter plot
+plt.figure(figsize=(8, 6))
+plt.scatter(pitch_locations['plate_x'], pitch_locations['plate_z'], alpha=0.3, s=10)
 
-for i, col in enumerate(predictors):
-    row = i // 2
-    col_idx = i % 2
-    sns.scatterplot(x=data[col], y=data['xwoba'], ax=axs[row][col_idx], color='darkorange')
-    axs[row][col_idx].set_title(f'{col} vs xwoba')
+# Add strike zone rectangle (approximate MLB standard: 17 inches wide, 1.5 to 3.5 feet tall)
+plt.axhline(1.5, color='red', linestyle='--')
+plt.axhline(3.5, color='red', linestyle='--')
+plt.axvline(-0.7083, color='red', linestyle='--')
+plt.axvline(0.7083, color='red', linestyle='--')
 
-plt.tight_layout()
+# Set axis limits
+plt.xlim(-4, 4)
+plt.ylim(-2.5, 7.5)
+
+# Labels and formatting
+plt.title('Pitch Locations: plate_x vs plate_z')
+plt.xlabel('plate_x (horizontal position in feet)')
+plt.ylabel('plate_z (vertical position in feet)')
+plt.grid(True)
 plt.show()
 ```
 
 ## High-Level Goal
 
-Predict key expected hitting metrics (xwOBA, xSLG, and xISO) using swing and contact profile data from MLB Statcast leaderboards.
+I plan to analyze pitch-level Statcast data to model the relationship between pitch location, swing decisions, and quality contact, using spatial visualizations and zone-based metrics for both pitchers and hitters.
 
 ## Dataset Description
 
-This project uses a dataset containing Major League Baseball Statcast data spanning the 2015 to 2025 seasons. The data was obtained from Baseball Savant and includes 1531 rows. Each row represents a qualified hitter and their respective metrics for the season that they played and includes a wide range of advanced metrics related to contact quality, swing behavior, and expected outcomes, including xwOBA, xSLG, xISO, exit velocity (EV), launch angle (LA), and hard-hit rates.
+This project proposes to use a dataset containing Major League Baseball Statcast data from the 2024 season. The data was obtained using the Python library `pybaseball` via the `statcast` function. It includes 709,511 rows and 119 columns, with each row representing an individual pitch event. The dataset captures detailed information on both the pitcher and hitter involved in each event, as well as contextual variables such as pitch type, exit velocity, launch angle, batted ball outcome, and pitch location.
 
-I chose this dataset because it offers a foundation for exploring the relationships between underlying batted-ball characteristics and expected offensive performance. It supports the goal of understanding how specific swing and contact metrics contribute to better outcomes at the plate. The large size and variety of swing metrics within the dataset also allow for more exploratory and explanatory analysis.
+This dataset was chosen because it enables player-level analysis by aggregating outcomes and tendencies across thousands of in-game events. It supports the exploration of how different pitching and hitting profiles relate to performance, and provides the granularity needed to evaluate behavior across specific zones, counts, and contact types. Its size and richness allow for both exploratory and explanatory analysis at the pitcher and hitter levels.
+
+## Column Definitions
+
+batter – MLB Player Id tied to the play event.
+
+game_year – Year game took place.
+
+game_date – The calendar date of the game (YYYY-MM-DD).
+
+home_team – Abbreviation of home team.
+
+stand – Side of the plate batter is standing.
+
+p_throws – Hand pitcher throws with.
+
+pitch_type – The type of pitch derived from Statcast.
+
+effective_speed – Derived speed based on the the extension of the pitcher's release.
+
+pfx_x – Horizontal movement in feet from the catcher's perspective.
+
+pfx_z – Vertical movement in feet from the catcher's perspective.
+
+plate_x – Horizontal position of the ball when it crosses home plate from the catcher's perspective.
+
+plate_z – Vertical position of the ball when it crosses home plate from the catcher's perspective.
+
+zone – Zone location of the ball when it crosses the plate from the catcher's perspective.
+
+description – Description of the resulting pitch.
+
+launch_speed – Exit velocity of the batted ball as tracked by Statcast. For the limited subset of batted balls not tracked directly, estimates are included based on the process described here (http://tangotiger.com/index.php/site/article/statcast-lab-no-nulls-in-batted-balls-launch-parameters).
+
+launch_angle – Launch angle of the batted ball as tracked by Statcast.
+
+hc_x – Hit coordinate X of batted ball.
+
+hc_y – Hit coordinate XY of batted ball.
+
+if_fielding_alignment – Infield fielding alignment at the time of the pitch.
+
+events – Event of the resulting Plate Appearance.
 
 ## Questions
 
-Can we predict a player’s expected offensive output (e.g., xwOBA or xSLG) using swing decisions and batted-ball quality metrics?
+Can we predict the likelihood of a hitter producing a favorable outcome (e.g., hit or hard contact) based on pitch type and location?
 
-Can we classify hitters into performance tiers (e.g., elite, average, below average) based on swing and contact profiles?
+How do swing decisions and contact quality vary by pitch characteristics and location, and can these patterns be used to identify hitter tendencies?
 
-## Analysis plan
+## Analysis Plan
 
-To address the first question, predicting a player’s expected offensive output, I plan to model xwOBA or xSLG using swing decision and contact quality metrics such as average launch angle, barrel rate, hard-hit percentage, whiff rate, swing rate, and various contact classifications. These variables reflect a hitter’s approach and ability to make quality contact, which are key drivers of expected performance. I’ll explore regression models like linear regression and random forests, using performance metrics such as RMSE and R² to evaluate accuracy. For the second question, classifying hitters into performance tiers, I plan to create a new categorical variable based on xwOBA percentiles (e.g., top 25%, middle 50%, bottom 25%) and use classification models such as logistic regression or decision trees to predict tier membership. Both questions may benefit from feature engineering (e.g., composite contact scores).
+To address the first question, predicting the likelihood of a favorable outcome, I plan to build classification models that take into account pitch type, pitch location, and hitter swing decisions (e.g., swing/no swing, in-zone vs. out-of-zone) to predict whether a given pitch results in a hit or another favorable result (e.g., hard contact or ball in play). Potential models include logistic regression, random forest classifiers, or gradient-boosted trees. I’ll evaluate model performance using metrics such as accuracy, precision, recall, and AUC.
+
+For the second question, identifying hitter tendencies, I will explore how swing decisions and contact quality vary across different pitch types and locations. I’ll use clustering techniques (e.g., k-means or hierarchical clustering) to group hitters based on their swing/contact profiles, which may reveal meaningful patterns or performance archetypes. Feature engineering may include creating aggregated zone-specific swing/contact rates or composite aggressiveness scores.
 
 ## Plan of Attack
 
 Week 1 (Aug 5–11):
 
-Clean and explore the data, create key visualizations, and finalize research questions.
+Clean and explore the dataset
+
+Create key visualizations to understand trends and relationships
+
+Finalize research questions and modeling strategy
 
 Week 2 (Aug 12–18):
 
-Build and evaluate predictive models for hitting metrics, tune parameters.
+Build and evaluate predictive models
+
+Tune model parameters and assess performance
+
+Begin drafting report and assembling visualizations
 
 Week 3 (Aug 19–20):
 
-Polish code, finalize report and visualizations, organize repo, and submit project.
+Finalize code and polish documentation
+
+Complete report and visualizations
+
+Organize GitHub repository and submit the project
 
 ## Repository Organization
 
