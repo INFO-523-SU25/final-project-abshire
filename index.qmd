@@ -39,26 +39,13 @@ The dataset was collected using Python’s `pybaseball` library (Statcast) with 
 Player IDs were merged from [MLBAM IDs](https://razzball.com/mlbamids/), and the data was filtered to focus on the top 100 hitters by average exit velocity to reduce computational overhead and remain within GitHub’s 100 MB limit. Finally, only pitches that resulted in balls put into play were retained, as contact quality cannot be assessed for pitches that were not hit.
 
 ```` python
-```{python}
+We```{python}
 #| echo: false
+#| results: markdown
+
 import pandas as pd
 
-# Load dataset
 df = pd.read_csv("data/pitch_2024_relevant.csv")
-
-# Basic dataset info
-print("Rows, Columns:", df.shape)
-print("Columns:", df.columns.tolist())
-
-# Show a small preview
-display(df.head(3))  # just first 3 rows
-
-# Summary of missing values
-missing_percent = df.isnull().mean().sort_values(ascending=False) * 100
-display(missing_percent.head(5))  # top 5 columns with missing data
-
-# Summary of key categorical columns
-for col in ['stand','p_throws','pitch_type','description','events']:
-    print(f"{col}: {df[col].nunique()} unique values")
+f"Rows, Columns: {df.shape}"
 ```
 ````
