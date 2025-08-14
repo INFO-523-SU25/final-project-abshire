@@ -44,7 +44,7 @@ Player IDs were merged from [MLBAM IDs](https://razzball.com/mlbamids/), and the
 import pandas as pd
 
 # Load dataset
-df = pd.read_csv("/workspaces/final-project-abshire/data/pitch_2024_relevant.csv")
+df = pd.read_csv("data/pitch_2024_relevant.csv")
 
 # Display basic info
 print("Shape (rows, columns):", df.shape)
