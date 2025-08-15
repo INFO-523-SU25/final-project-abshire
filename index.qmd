@@ -38,14 +38,44 @@ The dataset was collected using Python’s `pybaseball` library (Statcast) with 
 
 Player IDs were merged from [MLBAM IDs](https://razzball.com/mlbamids/), and the data was filtered to focus on the top 100 hitters by average exit velocity to reduce computational overhead and remain within GitHub’s 100 MB limit. Finally, only pitches that resulted in balls put into play were retained, as contact quality cannot be assessed for pitches that were not hit.
 
-```` python
-```{python}
-#| echo: false
-#| results: markdown
-
-import pandas as pd
-
-df = pd.read_csv("data/pitch_2024_relevant.csv")
-f"Rows, Columns: {df.shape}"
+```         
 ```
-````
+
+```{python}
+#| label: load-dataset
+#| message: false
+#| echo: false
+import pandas as pd
+from IPython.display import display
+
+data = pd.read_csv("data/pitch_2024_relevant.csv")
+
+# Print the shape
+print(f"Rows, Columns: {data.shape}\n")
+
+# Display the first 10 rows
+display(data.head(10))
+```
+
+## Column Definitions
+
+-   **batter** – MLB Player ID tied to the play event.\
+-   **game_year** – Year the game took place.\
+-   **game_date** – The calendar date of the game (YYYY-MM-DD).\
+-   **home_team** – Abbreviation of the home team.\
+-   **stand** – Side of the plate the batter is standing.\
+-   **p_throws** – Hand the pitcher throws with.\
+-   **pitch_type** – The type of pitch derived from Statcast.\
+-   **effective_speed** – Speed adjusted based on the pitcher's release extension.\
+-   **pfx_x** – Horizontal movement in feet from the catcher's perspective.\
+-   **pfx_z** – Vertical movement in feet from the catcher's perspective.\
+-   **plate_x** – Horizontal position of the ball when it crosses home plate.\
+-   **plate_z** – Vertical position of the ball when it crosses home plate.\
+-   **zone** – Zone location of the ball when it crosses the plate.\
+-   **description** – Description of the resulting pitch.\
+-   **launch_speed** – Exit velocity of the batted ball as tracked by Statcast. Estimates are included for batted balls not tracked directly [source](http://tangotiger.com/index.php/site/article/statcast-lab-no-nulls-in-batted-balls-launch-parameters).\
+-   **launch_angle** – Launch angle of the batted ball as tracked by Statcast.\
+-   **hc_x** – Hit coordinate X of batted ball.\
+-   **hc_y** – Hit coordinate Y of batted ball.\
+-   **if_fielding_alignment** – Infield fielding alignment at the time of the pitch.\
+-   **events** – Event of the resulting plate appearance.
