@@ -38,7 +38,18 @@ The dataset was collected using Python’s `pybaseball` library (Statcast) with 
 
 Player IDs were merged from [MLBAM IDs](https://razzball.com/mlbamids/), and the data was filtered to focus on the top 100 hitters by average exit velocity to reduce computational overhead and remain within GitHub’s 100 MB limit. Finally, only pitches that resulted in balls put into play were retained, as contact quality cannot be assessed for pitches that were not hit.
 
-```         
+```{python}
+#| label: basic-checks
+#| echo: false
+#| results: hide
+#| message: false
+
+import pandas as pd
+
+df = pd.read_csv("/workspaces/final-project-abshire/data/pitch_2024_relevant.csv")
+
+# Percentage of missing values per column
+missing_percent = df.isnull().mean().sort_values(ascending=False) * 100
 ```
 
 ```{python}
@@ -79,3 +90,199 @@ display(data.head(10))
 -   **hc_y** – Hit coordinate Y of batted ball.\
 -   **if_fielding_alignment** – Infield fielding alignment at the time of the pitch.\
 -   **events** – Event of the resulting plate appearance.
+
+```{python}
+import pandas as pd
+
+# Load data
+pitch_df = pd.read_csv('/workspaces/final-project-abshire/data/pitch_2024_relevant.csv')
+player_ids_df = pd.read_csv('/workspaces/final-project-abshire/data/player_ids.csv')
+
+# Prepare player IDs
+player_ids_sub = player_ids_df[['MLBAMID', 'Name']].rename(columns={'Name': 'batter_name'})
+
+# Merge on batter and MLBAMID
+df_hits = pitch_df.merge(player_ids_sub, left_on='batter', right_on='MLBAMID', how='left')
+df_hits = df_hits.drop(columns=['MLBAMID'])
+df_hits = df_hits.rename(columns={'player_name': 'pitcher_name'})
+
+# Filter to hitting events only
+hitting_events = ['single', 'double', 'triple', 'home_run']
+df_hits = df_hits[df_hits['events'].isin(hitting_events)].copy()
+
+# Now define your pitch_type_map
+pitch_type_map = {
+    'FF': 'Fastball',  # Four-Seam
+    'FA': 'Fastball',  # General Fastball
+    'FT': 'Fastball',  # Two-Seam
+    'SI': 'Fastball',  # Sinker
+    'FS': 'Fastball',  # Split Finger
+    'SL': 'Slider',    # Slider
+    'SV': 'Slider',    # Slurve
+    'ST': 'Curveball', # Sweeper
+    'CU': 'Curveball', # Curveball
+    'KC': 'Curveball', # Knuckle Curve
+    'CH': 'Changeup',  # Change Up
+    'FO': 'Changeup',  # Fork Ball
+    'EP': 'Changeup',  # Eephus
+    'FC': 'Fastball',  # Cutter
+    'KN': 'Knuckleball', # Knuckleball
+    'SC': 'Other',     # Screwball
+    'CS': 'Other',     # Slow Curve
+    'PO': 'Other',     # Pitch Out?
+    None: 'Unknown',   # or np.nan mapped to 'Unknown'
+    'NaN': 'Unknown'   # if string 'NaN'
+}
+
+# Map pitch_type to pitch_group column
+df_hits['pitch_group'] = df_hits['pitch_type'].map(pitch_type_map).fillna('Unknown')
+```
+
+```{python}
+#| label: distribution and scatter
+#| message: false
+#| echo: false
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Summary stats of launch speed and launch angle by hit type
+summary_stats = df_hits.groupby('events')[['launch_speed', 'launch_angle']].describe()
+# print(summary_stats)
+
+# Plot distribution of launch speed by hit type
+plt.figure(figsize=(10, 6))
+sns.histplot(data=df_hits, x='launch_speed', hue='events', bins=30, kde=True, palette='viridis')
+plt.title('Launch Speed Distribution by Hit Type')
+plt.xlabel('Launch Speed (mph)')
+plt.ylabel('Count')
+plt.show()
+
+# Scatterplot of launch speed vs launch angle by hit type
+plt.figure(figsize=(10, 6))
+sns.scatterplot(data=df_hits, x='launch_speed', y='launch_angle', hue='events', alpha=0.6, palette='viridis')
+plt.title('Launch Speed vs Launch Angle by Hit Type')
+plt.xlabel('Launch Speed (mph)')
+plt.ylabel('Launch Angle (degrees)')
+plt.show()
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(12,8))
+
+# Scatterplot of launch speed vs launch angle by hit type
+sns.scatterplot(
+    data=df_hits, 
+    x='launch_speed', 
+    y='launch_angle', 
+    hue='events', 
+    alpha=0.6, 
+    palette='viridis',
+    edgecolor=None,
+    s=30
+)
+
+# Add shaded boxes for typical launch windows (approximate)
+
+# Singles
+plt.axvspan(80.4, 101.4, ymin=(1 + 90)/180, ymax=(15 + 90)/180, color='blue', alpha=0.6, label='Typical Single Window')
+
+# Doubles
+plt.axvspan(93.7, 104.7, ymin=(12 + 90)/180, ymax=(22 + 90)/180, color='green', alpha=0.6, label='Typical Double Window')
+
+# Triples
+plt.axvspan(94.8, 103.6, ymin=(13.75 + 90)/180, ymax=(25 + 90)/180, color='orange', alpha=0.6, label='Typical Triple Window')
+
+# Home Runs
+plt.axvspan(101.5, 107.2, ymin=(25 + 90)/180, ymax=(32 + 90)/180, color='red', alpha=0.6, label='Typical HR Window')
+
+plt.title('Launch Speed vs Launch Angle by Hit Type (2024)')
+plt.xlabel('Launch Speed (mph)')
+plt.ylabel('Launch Angle (degrees)')
+plt.legend(title='Hit Type')
+plt.grid(True)
+plt.show()
+
+zone_summary = (
+    df_hits
+    .groupby('zone')[['launch_speed']]
+    .agg(['count', 'mean', 'std', 'median'])
+    .round(2)
+)
+
+zone_summary
+```
+
+```{python}
+#| label: strike-zone-heatmap
+#| message: false
+#| warning: false
+#| echo: false
+#| results: hide
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+
+# Example: your summarized data in a DataFrame
+zone_data = {
+    'zone': [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14],
+    'mean_launch_speed': [91.52, 96.43, 92.24, 94.05, 98.12, 94.48, 94.39, 97.44, 92.73, 84.30, 85.24, 85.43, 83.39]
+}
+df_zone = pd.DataFrame(zone_data)
+
+# Strike zone layout mapping
+zone_grid = pd.DataFrame([
+    [11, None, 12],
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
+    [13, None, 14] 
+])
+
+# Map mean launch speed to the grid
+heatmap_values = zone_grid.replace(
+    {z: df_zone.set_index('zone')['mean_launch_speed'].get(z) for z in df_zone['zone']}
+)
+
+# Plot
+plt.figure(figsize=(6,8))
+sns.heatmap(
+    heatmap_values.astype(float), 
+    annot=True, fmt=".1f", cmap="RdYlGn", 
+    linewidths=1, cbar_kws={'label': 'Mean Launch Speed (mph)'},
+    vmin=80, vmax=100
+)
+plt.title('Mean Launch Speed by Statcast Zone', fontsize=14)
+plt.ylabel('Pitch Height in Zone')
+plt.xlabel('Horizontal Location in Zone')
+plt.gca().invert_yaxis()
+plt.show()
+
+```
+
+
+```{python}
+#| label: angle and speed box by zone
+#| message: false
+#| warning: false
+#| echo: false
+#| results: hide
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+# Boxplot for launch speed by zone
+sns.boxplot(data=df_hits, x='zone', y='launch_speed', ax=axes[0], palette='viridis')
+axes[0].set_title('Launch Speed by Zone')
+axes[0].set_xlabel('Pitch Zone')
+axes[0].set_ylabel('Launch Speed (mph)')
+
+# Boxplot for launch angle by zone
+sns.boxplot(data=df_hits, x='zone', y='launch_angle', ax=axes[1], palette='magma')
+axes[1].set_title('Launch Angle by Zone')
+axes[1].set_xlabel('Pitch Zone')
+axes[1].set_ylabel('Launch Angle (°)')
+
+plt.tight_layout()
+```
