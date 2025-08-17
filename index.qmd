@@ -729,3 +729,7 @@ display(out)
 ```
 
 The interactive slider (currently not functional in the HTML output) is designed to let users input launch angle, launch speed, effective pitch speed, and zone of the pitch to see the model’s predicted probability of a hit versus a non-hit.
+
+## Conclusion
+
+This project demonstrates that batted-ball outcomes can be reasonably predicted using key swing and pitch metrics. By analyzing launch angle, launch speed, effective pitch speed, and zone location, the Random Forest model achieved strong predictive performance with approximately 80% accuracy and an ROC AUC of \~0.86. The analysis highlights that both batter swing mechanics and pitch characteristics, including speed and location, play critical roles in determining whether a ball becomes a hit. Heatmaps and distribution plots further emphasize that certain zones and pitch types lead to more successful batted balls, providing actionable insights for player development and strategy. The interactive prediction tool demonstrates the potential for personalized scenario testing. Overall, this work shows the value of combining Statcast data with machine learning to better understand the dynamics of hitting in baseball.
