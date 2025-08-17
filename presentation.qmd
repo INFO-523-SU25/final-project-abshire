@@ -1,5 +1,5 @@
 ---
-title: "Project title"
+title: "Sweet Spotting"
 subtitle: "INFO 523 - Summer 2025 - Final Project"
 author: "Author names"
 title-slide-attributes:
@@ -18,27 +18,80 @@ execute:
 ---
 
 ```{python}
-#| label: load-packages
+#| label: set up
 #| include: false
 
-# Load packages here
 import pandas as pd
-import seaborn as sns
 
+df = pd.read_csv("/workspaces/final-project-abshire/data/pitch_2024_relevant.csv")
+
+# Basic checks
+print(df.shape)       # rows, columns
+print(df.columns)     # column names
+df.head()             # first 5 rows
+df.info()             # datatypes & null counts
+df.describe()         # summary stats for numeric columns
+
+# Check for duplicate rows
+print(f"Duplicate rows: {df.duplicated().sum()}")
+# 0 duplicate rows, that's huge
+
+# Percentage of missing values per column
+missing_percent = df.isnull().mean().sort_values(ascending=False) * 100
+print(missing_percent)
+
+# Unique counts for all object columns
+for col in df.select_dtypes(include='object').columns:
+    print(f"{col}: {df[col].nunique()} unique values")
 ```
 
 ```{python}
-#| label: setup
+#| label: datahead
 #| include: false
-#| 
-# Set up plot theme and figure resolution
-sns.set_theme(style="whitegrid")
-sns.set_context("notebook", font_scale=1.1)
+# Load data
+pitch_df = pd.read_csv('/workspaces/final-project-abshire/data/pitch_2024_relevant.csv')
+player_ids_df = pd.read_csv('/workspaces/final-project-abshire/data/player_ids.csv')
 
-import matplotlib.pyplot as plt
-plt.rcParams['figure.dpi'] = 300
-plt.rcParams['savefig.dpi'] = 300
-plt.rcParams['figure.figsize'] = (6, 6 * 0.618)
+# Prepare player IDs
+player_ids_sub = player_ids_df[['MLBAMID', 'Name']].rename(columns={'Name': 'batter_name'})
+
+# Merge on batter and MLBAMID
+df_hits = pitch_df.merge(player_ids_sub, left_on='batter', right_on='MLBAMID', how='left')
+df_hits = df_hits.drop(columns=['MLBAMID'])
+df_hits = df_hits.rename(columns={'player_name': 'pitcher_name'})
+
+# Filter to hitting events only
+hitting_events = ['single', 'double', 'triple', 'home_run']
+df_hits = df_hits[df_hits['events'].isin(hitting_events)].copy()
+
+# Now define your pitch_type_map
+pitch_type_map = {
+    'FF': 'Fastball',  # Four-Seam
+    'FA': 'Fastball',  # General Fastball
+    'FT': 'Fastball',  # Two-Seam
+    'SI': 'Fastball',  # Sinker
+    'FS': 'Fastball',  # Split Finger
+    'SL': 'Slider',    # Slider
+    'SV': 'Slider',    # Slurve
+    'ST': 'Curveball', # Sweeper
+    'CU': 'Curveball', # Curveball
+    'KC': 'Curveball', # Knuckle Curve
+    'CH': 'Changeup',  # Change Up
+    'FO': 'Changeup',  # Fork Ball
+    'EP': 'Changeup',  # Eephus
+    'FC': 'Fastball',  # Cutter
+    'KN': 'Knuckleball', # Knuckleball
+    'SC': 'Other',     # Screwball
+    'CS': 'Other',     # Slow Curve
+    'PO': 'Other',     # Pitch Out?
+    None: 'Unknown',   # or np.nan mapped to 'Unknown'
+    'NaN': 'Unknown'   # if string 'NaN'
+}
+
+# Map pitch_type to pitch_group column
+df_hits['pitch_group'] = df_hits['pitch_type'].map(pitch_type_map).fillna('Unknown')
+
+print(df_hits.head())
 ```
 
 ```{python}

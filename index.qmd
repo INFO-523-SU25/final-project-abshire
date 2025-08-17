@@ -217,10 +217,10 @@ zone_summary
 
 Using the mean launch angle and launch speed for different hit types—singles, doubles, triples, and home runs—this scatter plot highlights the typical “windows” in which each type of hit occurs. The shaded regions indicate the ranges of launch speeds and angles where each hit type is most likely:
 
-- **Singles:** Blue shaded area (`80.4–101.4 mph` launch speed, `1–15°` launch angle)  
-- **Doubles:** Green shaded area (`93.7–104.7 mph` launch speed, `12–22°` launch angle)  
-- **Triples:** Orange shaded area (`94.8–103.6 mph` launch speed, `13.75–25°` launch angle)  
-- **Home Runs:** Red shaded area (`101.5–107.2 mph` launch speed, `25–32°` launch angle)  
+-   **Singles:** Blue shaded area (`80.4–101.4 mph` launch speed, `1–15°` launch angle)\
+-   **Doubles:** Green shaded area (`93.7–104.7 mph` launch speed, `12–22°` launch angle)\
+-   **Triples:** Orange shaded area (`94.8–103.6 mph` launch speed, `13.75–25°` launch angle)\
+-   **Home Runs:** Red shaded area (`101.5–107.2 mph` launch speed, `25–32°` launch angle)
 
 These visual ranges are useful for understanding batted ball outcomes and for creating predictive models of hit success.
 
@@ -272,7 +272,6 @@ plt.show()
 ```
 
 In conjunction with swing characteristics, it is also important to consider pitch location (zone). Zones 1–9 correspond to strikes, while zones 11–14 are outside of the strike zone. From the data, we can see that the hardest hits, and the highest likelihood of success, occur in zones **2, 5, and 8**.
-
 
 ```{python}
 #| label: boxplot with angles and velo
@@ -682,7 +681,6 @@ def predict_hit(launch_angle, launch_speed, effective_speed, zone):
 ```
 
 The updated model achieves 79% accuracy with an ROC AUC of 0.857, showing slightly lower performance than the previous model but still strong overall. It effectively distinguishes hits from non-hits, though precision and recall are higher for non-hit events, reflecting the challenge of predicting hits. Key features driving the predictions include launch angle, launch speed, and effective pitch speed. While pitch movement metrics (pfx_x, pfx_z) were not used as inputs, the model still allows the user to select the zone, which captures the general location of the pitch and helps approximate its influence on hitting success.
-
 
 ## Almost Interactive Slider
 
