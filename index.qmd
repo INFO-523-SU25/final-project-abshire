@@ -329,65 +329,70 @@ plt.show()
 
 The zones with the highest frequency of doubles and home runs are 2 and 5, with zone 8 as a third. This pattern aligns with exit velocity tendencies and is important for model considerations.
 
-{python}
-#\| label: launch speed by zone by pitch
-#\| message: false
-#\| echo: false
+```{#| label: launch-speed-by-zone}
+#| message: false
+#| echo: false
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
-# Zone/grid
-zone_grid = pd.DataFrame(\[
-\[11, None, 12\],
-\[1, 2, 3\],
-\[4, 5, 6\],
-\[7, 8, 9\],
-\[13, None, 14\]
-\])
+# Define strike zone layout
+zone_grid = pd.DataFrame([
+    [11, None, 12],
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
+    [13, None, 14]
+])
 
-# List of pitch groups you want to plot
-pitch_groups = \['Fastball', 'Slider', 'Curveball', 'Changeup'\]
+# List of pitch groups to plot
+pitch_groups = ['Fastball', 'Slider', 'Curveball', 'Changeup']
 
-
-# Set up plot grid size
+# Set up plot grid
 n = len(pitch_groups)
 cols = 2
 rows = (n + 1) // cols
 
-fig, axes = plt.subplots(rows, cols, figsize=(cols\*6, rows\*8), constrained_layout=True)
+fig, axes = plt.subplots(rows, cols, figsize=(cols * 6, rows * 8), constrained_layout=True)
 
 for ax, pg in zip(axes.flatten(), pitch_groups):
-\# Filter for this pitch_group
-subset = df_hits\[df_hits\['pitch_group'\] == pg\]
+    # Filter data for the pitch group
+    subset = df_hits[df_hits['pitch_group'] == pg]
 
-\# Compute mean launch speed by zone
-df_zone = (
-subset.groupby('zone')\['launch_speed'\]
-.mean()
-.reset_index()
-)
+    # Compute mean launch speed by zone
+    df_zone = (
+        subset.groupby('zone')['launch_speed']
+        .mean()
+        .reset_index()
+    )
 
-\# Map mean launch speed to the strike zone grid
-heatmap_values = zone_grid.replace(
-{z: df_zone.set_index('zone')\['launch_speed'\].get(z) for z in df_zone\['zone'\]}
-)
+    # Map values to strike zone grid
+    heatmap_values = zone_grid.replace(
+        {z: df_zone.set_index('zone')['launch_speed'].get(z) for z in df_zone['zone']}
+    )
 
-sns.heatmap(
-heatmap_values.astype(float),
-annot=True, fmt=".1f", cmap="RdYlGn",
-linewidths=1, cbar_kws={'label': 'Mean Launch Speed (mph)'},
-vmin=80, vmax=105,
-ax=ax
-)
-ax.set_title(f'Mean Launch Speed - {pg}', fontsize=14)
-ax.invert_yaxis()
+    # Plot heatmap
+    sns.heatmap(
+        heatmap_values.astype(float),
+        annot=True,
+        fmt=".1f",
+        cmap="RdYlGn",
+        linewidths=1,
+        cbar_kws={'label': 'Mean Launch Speed (mph)'},
+        vmin=80,
+        vmax=105,
+        ax=ax
+    )
+    ax.set_title(f'Mean Launch Speed - {pg}', fontsize=14)
+    ax.invert_yaxis()
 
-# If you have empty subplots, remove them
-for ax in axes.flatten()\[n:\]:
-fig.delaxes(ax)
+# Remove any unused subplots
+for ax in axes.flatten()[n:]:
+    fig.delaxes(ax)
 
 plt.show()
+```
 
 These heatmaps show that hitters generate the hardest contact in zones 2, 5, and 9 across all pitch types, with Fastballs generally producing the highest launch speeds. Originally, the pitch type was expected to influence launch speed, but this does not seem to be the case. This helps inform feature selection.
 
@@ -574,6 +579,8 @@ plt.show()
 
 The model achieves 80% accuracy with an ROC AUC of 0.86, indicating strong predictive ability for distinguishing hits from non-hits. In this scenario, the Random Forest model uses an ensemble of decision trees to learn complex, non-linear relationships between the pitch and swing features and the outcome of a batted ball. The top features driving this prediction are launch angle, launch speed, and effective pitch speed, followed by pitch movement and plate location metrics, highlighting that both the batter’s swing characteristics and the pitch’s movement/location are critical factors in determining batted-ball success.
 
+From a practical standpoint, this model provides valuable insights for coaches and analysts looking to recruit talent or tailor swing mechanics. By identifying the key factors that influence successful contact, player development staff can offer more targeted feedback to optimize individual performance. Additionally, the ROC AUC of 0.86 is particularly applicable in the context of baseball, where some well-hit balls still result in outs due to defensive positioning. This helps create a high-performing probabilistic model more applicable than a binary outcome model, as it accounts for the nuanced nature of the game and supports more informed, evidence-based decisions.
+
 ```{python}
 #| label: New Model
 #| message: false
@@ -707,3 +714,5 @@ The interactive slider (currently not functional in the HTML output) is designed
 ## Conclusion
 
 This project demonstrates that batted-ball outcomes can be reasonably predicted using key swing and pitch metrics. By analyzing launch angle, launch speed, effective pitch speed, and zone location, the Random Forest model achieved strong predictive performance with approximately 80% accuracy and an ROC AUC of \~0.86. The analysis highlights that both batter swing mechanics and pitch characteristics, including speed and location, play critical roles in determining whether a ball becomes a hit. Heatmaps and distribution plots further emphasize that certain zones and pitch types lead to more successful batted balls, providing actionable insights for player development and strategy. The interactive prediction tool demonstrates the potential for personalized scenario testing. Overall, this work shows the value of combining Statcast data with machine learning to better understand the dynamics of hitting in baseball.
+
+In practice, this type of model can directly support coaches and analysts in guiding swing adjustments, optimizing player development, and identifying undervalued talent during recruitment or trades. With a strong AUC of \~0.86, the model accounts for the fact that even well-hit balls can result in outs due to defensive positioning, making its real-world usefulness even more evident. As teams continue to invest heavily in data-driven decision-making, predictive tools like this offer a competitive edge in forecasting performance and enhancing on-field outcomes.

@@ -23,7 +23,7 @@ execute:
 
 import pandas as pd
 
-df = pd.read_csv("/workspaces/final-project-abshire/data/pitch_2024_relevant.csv")
+df = pd.read_csv("data/pitch_2024_relevant.csv")
 
 # Basic checks
 print(df.shape)       # rows, columns
@@ -49,8 +49,8 @@ for col in df.select_dtypes(include='object').columns:
 #| label: datahead
 #| include: false
 # Load data
-pitch_df = pd.read_csv('/workspaces/final-project-abshire/data/pitch_2024_relevant.csv')
-player_ids_df = pd.read_csv('/workspaces/final-project-abshire/data/player_ids.csv')
+pitch_df = pd.read_csv('data/pitch_2024_relevant.csv')
+player_ids_df = pd.read_csv('data/player_ids.csv')
 
 # Prepare player IDs
 player_ids_sub = player_ids_df[['MLBAMID', 'Name']].rename(columns={'Name': 'batter_name'})
