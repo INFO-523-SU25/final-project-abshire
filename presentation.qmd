@@ -256,8 +256,8 @@ plt.show()
 import pandas as pd
 
 # Load data
-pitch_df = pd.read_csv('/workspaces/final-project-abshire/data/pitch_2024_top100_reduced.csv')
-player_ids_df = pd.read_csv('/workspaces/final-project-abshire/data/player_ids.csv')
+pitch_df = pd.read_csv('data/pitch_2024_top100_reduced.csv')
+player_ids_df = pd.read_csv('data/player_ids.csv')
 
 # Prepare player IDs
 player_ids_sub = player_ids_df[['MLBAMID', 'Name']].rename(columns={'Name': 'batter_name'})
@@ -303,8 +303,8 @@ df_top100['pitch_group'] = df_top100['pitch_type'].map(pitch_type_map).fillna('U
 import pandas as pd
 
 # Load data
-pitch_df = pd.read_csv('/workspaces/final-project-abshire/data/pitch_2024_top100_reduced.csv')
-player_ids_df = pd.read_csv('/workspaces/final-project-abshire/data/player_ids.csv')
+pitch_df = pd.read_csv('data/pitch_2024_top100_reduced.csv)
+player_ids_df = pd.read_csv('data/player_ids.csv')
 
 # Prepare player IDs
 player_ids_sub = player_ids_df[['MLBAMID', 'Name']].rename(columns={'Name': 'batter_name'})
@@ -348,8 +348,8 @@ df_top100['pitch_group'] = df_top100['pitch_type'].map(pitch_type_map).fillna('U
 #print(df_top100.head())
 
 # Load data
-bip_df = pd.read_csv('/workspaces/final-project-abshire/data/BIP_2024_top100.csv')
-player_ids_df = pd.read_csv('/workspaces/final-project-abshire/data/player_ids.csv')
+bip_df = pd.read_csv('data/BIP_2024_top100.csv')
+player_ids_df = pd.read_csv('data/player_ids.csv')
 
 # Prepare player IDs
 player_ids_sub = player_ids_df[['MLBAMID', 'Name']].rename(columns={'Name': 'batter_name'})

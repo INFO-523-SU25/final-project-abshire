@@ -24,6 +24,8 @@ The primary objective of this project was to analyze pitch-by-pitch data from Ma
 
 Although the initial plan was to perform the analysis at the player level, exploration revealed that swing characteristics are largely general across players. As a result, the model was built using aggregated pitch-level data from the top 100 hitters. Pitch type was found to have minimal influence on hit outcomes, whereas effective pitch speed, launch angle, launch speed, and zone were significant predictors. Due to the binary nature of hit outcomes, a Random Forest classifier was used to model the probability of a hit.
 
+To note: Some portions of this analysis and code suggestions were assisted by AI tools including OpenAI's ChatGPT and Google's Gemini. Final content was reviewed and edited by the author.
+
 ## Abstract
 
 This project leverages machine learning to predict the likelihood that a batted ball in Major League Baseball will result in a hit, based on pitch-level features such as launch angle, launch speed, effective pitch speed, and zone location. Using a Random Forest classifier trained on data from the top 100 hitters in the 2024 season, the model provides probabilistic predictions for each pitch. An interactive interface allows users to input custom pitch values and instantly see the predicted outcome, providing insights into contact quality and offensive performance.
@@ -272,6 +274,8 @@ plt.show()
 ```
 
 In conjunction with swing characteristics, it is also important to consider pitch location (zone). Zones 1–9 correspond to strikes, while zones 11–14 are outside of the strike zone. From the data, we can see that the hardest hits, and the highest likelihood of success, occur in zones **2, 5, and 8**.
+
+I was not able to remove these output lines for the life of me, apologies!
 
 ```{python}
 #| label: boxplot with angles and velo
