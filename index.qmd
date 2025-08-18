@@ -333,7 +333,8 @@ plt.show()
 
 The zones with the highest frequency of doubles and home runs are 2 and 5, with zone 8 as a third. This pattern aligns with exit velocity tendencies and is important for model considerations.
 
-```{#| label: launch-speed-by-zone}
+```{python}
+#| label: launch speed by pitch group
 #| message: false
 #| echo: false
 
