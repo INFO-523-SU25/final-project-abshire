@@ -303,7 +303,7 @@ df_top100['pitch_group'] = df_top100['pitch_type'].map(pitch_type_map).fillna('U
 import pandas as pd
 
 # Load data
-pitch_df = pd.read_csv('data/pitch_2024_top100_reduced.csv)
+pitch_df = pd.read_csv('data/pitch_2024_top100_reduced.csv')
 player_ids_df = pd.read_csv('data/player_ids.csv')
 
 # Prepare player IDs
